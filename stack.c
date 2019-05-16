@@ -14,7 +14,7 @@ int main()
 	printf("Top element is %d\n", STACK_PEEK(int,root)); 
 
     STACK_TYPE(double)* rootDouble = NULL; 
-    printf("Output for Double:\n");
+    printf("\nOutput for Double:\n");
 	STACK_PUSH(double,&rootDouble, 10);
 	STACK_PUSH(double,&rootDouble, 20);
     STACK_PUSH(double,&rootDouble, 30); 
@@ -24,7 +24,7 @@ int main()
 	printf("Top element is %lf\n", STACK_PEEK(double,rootDouble));
 
     STACK_TYPE(string)* rootString = NULL; 
-    printf("Output for string:\n");
+    printf("\nOutput for string:\n");
 	STACK_PUSH(string,&rootString, "Hello");
 	STACK_PUSH(string,&rootString, "Hi");
     STACK_PUSH(string,&rootString, "Bye"); 

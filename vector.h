@@ -71,3 +71,4 @@
 static inline _qvec_free(void **qvec) { free(*qvec); }
 #define raii __attribute__ ((cleanup(_qvec_free)))
 #endif
+#endif

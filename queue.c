@@ -13,6 +13,7 @@ int main()
 	QUEUE_ENQUEUE(int,q, 50); 
 	QUEUE_NODE_TYPE(int) *n = QUEUE_DEQUEUE(int,q); 
 	if (n != NULL) 
+	printf("Output for int:\n");
 	printf("Dequeued item is %d\n", n->key); 
 
 	QUEUE_TYPE(double)* qDouble = QUEUE_CREATE(double); 
@@ -25,6 +26,7 @@ int main()
 	QUEUE_ENQUEUE(double,qDouble, 50); 
 	QUEUE_NODE_TYPE(double) *nDouble = QUEUE_DEQUEUE(double,qDouble); 
 	if (nDouble != NULL) 
+	printf("\nOutput for double:\n");
 	printf("Dequeued item is %lf\n", nDouble->key);
 
 	QUEUE_TYPE(string)* qString = QUEUE_CREATE(string); 
@@ -37,6 +39,7 @@ int main()
 	QUEUE_ENQUEUE(string,qString, "?"); 
 	QUEUE_NODE_TYPE(string) *nString = QUEUE_DEQUEUE(string,qString); 
 	if (nString != NULL) 
+	printf("\nOutput for string:\n");
 	printf("Dequeued item is %s\n", nString->key);
 
 	return 0; 

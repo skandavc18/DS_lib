@@ -20,7 +20,7 @@ void main()
     //printf("\n");
     //traversal(x);
     //printf("\n");
-    //printf("%d\n", search_tree(int, x, 15));
+    printf("%d\n", search_tree(int, x, 15));
     //delete_tree(int, x, 10);
     printLevelOrder(x);
     printf("\n");
