@@ -56,7 +56,7 @@ long long double_hashfunc(double x, int size)
 }
 long long int_hashfunc(int x, int size)
 {
-    long long hkey = x % size;
+    long long hkey = (long long)(x % size);
     return hkey;
 }
 
@@ -101,11 +101,12 @@ typedef struct
 
 void str_dict_rehash(str_htable obj);
 
-#define dict_declarations(TYPE)                                  \
-    TYPE##_htable TYPE##_dict_new(int size);                     \
-    void TYPE##_dict_rehash(TYPE##_htable obj);                  \
-    int TYPE##_dict_insert(TYPE##_htable table, TYPE x);         \
-    int TYPE##_dict_delete(TYPE##_htable table, TYPE x);         \
+#define dict_declarations(TYPE)                               \
+    TYPE##_htable TYPE##_dict_new(int size);                  \
+    TYPE##_htable TYPE##_dict_rehash(TYPE##_htable obj);       \
+    int TYPE##_dict_insert_help(TYPE##_htable table, TYPE x); \
+    TYPE##_htable TYPE##_dict_insert(TYPE##_htable table, TYPE x);\
+    int TYPE##_dict_delete(TYPE##_htable table, TYPE x);      \
     long long TYPE##_dict_search(TYPE##_htable table, TYPE x);
 
 #define dict_new(TYPE)                                              \
@@ -119,22 +120,8 @@ void str_dict_rehash(str_htable obj);
         return NAME;                                                \
     }
 
-#define dict_rehash(TYPE)                                             \
-    void TYPE##_dict_rehash(TYPE##_htable obj)                         \
-    {                                                             \
-        TYPE##_htable temp = TYPE##_dict_new(nextPrime(obj->size * 2));\
-        for (int i = 0; i < obj->size; i++)                       \
-        {                                                         \
-            if (obj->arr[i].valid == 1)                           \
-                TYPE##_dict_insert(temp, obj->arr[i].data);            \
-        }                                                         \
-        free(obj->arr);                                           \
-        free(obj);                                                \
-        *(obj) = *(temp);                                         \
-    }
-
-#define dict_insert(TYPE)                                                                     \
-    int TYPE##_dict_insert(TYPE##_htable table, TYPE x)                                        \
+#define dict_insert_help(TYPE)                                                            \
+    int TYPE##_dict_insert_help(TYPE##_htable table, TYPE x)                              \
     {                                                                                     \
         long long hash = TYPE##_hashfunc(x, table->size);                                 \
         if ((table->arr[hash].valid == 1) && (TYPE##_cmp(x, table->arr[hash].data) == 0)) \
@@ -152,12 +139,35 @@ void str_dict_rehash(str_htable obj);
                 i++;                                                                      \
             }                                                                             \
         }                                                                                 \
-        table->arr[hash].data=x;                                                          \
+        table->arr[hash].data = x;                                                        \
         table->arr[hash].valid = 1;                                                       \
         table->curr_size += 1;                                                            \
-        if (table->curr_size / table->size > 0.75)                                        \
-            TYPE##_dict_rehash(table);                                                         \
         return 1;                                                                         \
+    }
+
+#define dict_rehash(TYPE)                                                 \
+    TYPE##_htable TYPE##_dict_rehash(TYPE##_htable obj)                   \
+    {                                                                     \
+        TYPE##_htable temp = TYPE##_dict_new(nextPrime(obj->size * 2)); \
+        for (int i = 0; i < (obj)->size; i++)                             \
+        {                                                                 \
+            if (obj->arr[i].valid == 1)                                 \
+                TYPE##_dict_insert_help(temp, obj->arr[i].data);        \
+        }                                                                 \
+        free(obj->arr);                                                 \
+        free(obj);                                                        \
+        return temp;                                                      \
+    }
+
+#define dict_insert(TYPE)                                          \
+    TYPE##_htable TYPE##_dict_insert(TYPE##_htable table, TYPE x)   \
+    {                                                              \
+        if ((double)((table->curr_size + 1) / table->size) > 0.75) \
+        {                                                           \
+            table = TYPE##_dict_rehash(table);                     \
+        }                                                           \
+        TYPE##_dict_insert_help(table, x);                         \
+        return table;                                               \
     }
 
 #define dict_search(TYPE)                                                                        \
@@ -193,8 +203,8 @@ void str_dict_rehash(str_htable obj);
         long long pos = TYPE##_dict_search(table, x);   \
         if (pos != -1)                             \
         {                                          \
-            table->arr[pos].valid = -1;            \
-            table->curr_size += 1;                 \
+            table->arr[pos].valid = 0;            \
+            table->curr_size -= 1;                 \
             return 1;                              \
         }                                          \
         return -1;                                 \
@@ -208,12 +218,15 @@ void str_dict_rehash(str_htable obj);
     dict_new(int)              \
     dict_insert(int)           \
     dict_rehash(int)           \
+    dict_insert_help(int) \
     dict_search(int)           \
     dict_delete(int)      
+    
 #define char_define_dict()\
     dict_declarations(char)     \
     dict_struct(char)         \
-    dict_new(char)              \
+    dict_new(char)               \
+    dict_insert_help(char)      \
     dict_insert(char)           \
     dict_rehash(char)           \
     dict_search(char)           \
@@ -223,6 +236,7 @@ void str_dict_rehash(str_htable obj);
     dict_declarations(float)      \
     dict_struct(float)     \
     dict_new(float)              \
+    dict_insert_help(float) \
     dict_insert(float)           \
     dict_rehash(float)           \
     dict_search(float)           \
@@ -234,6 +248,7 @@ void str_dict_rehash(str_htable obj);
     dict_struct(long)     \
     dict_new(long)              \
     dict_insert(long)           \
+    dict_insert_help(long) \
     dict_rehash(long)           \
     dict_search(long)           \
     dict_delete(long)  
@@ -245,6 +260,7 @@ void str_dict_rehash(str_htable obj);
     dict_new(double)              \
     dict_insert(double)           \
     dict_rehash(double)           \
+    dict_insert_help(double) \
     dict_search(double)           \
     dict_delete(double)  
 
@@ -255,7 +271,7 @@ void str_dict_rehash(str_htable obj);
     TYPE##_dict_new(size)
 
 #define insert_dict(TYPE, table, data)\
-    TYPE##_dict_insert(table,data)
+    table=TYPE##_dict_insert(table,data)
 
 #define search_dict(TYPE, table, data)\
     TYPE##_dict_search(table,data)
